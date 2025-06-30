@@ -1,0 +1,11 @@
+# Ignore Python virtual environment
+backend/venv/
+
+# Node modules
+frontend/node_modules/
+
+# VS Code config
+.vscode/
+
+# System files
+.DS_Store
