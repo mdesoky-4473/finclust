@@ -1,10 +1,10 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from app.data_generator import generate_user_data
 from app.clustering import cluster_logic
+import pandas as pd
 
 router = APIRouter()
-
-generated_data = []  # Global variable to hold generated data
+generated_data = []  # Global variable for demo use only
 
 @router.get("/generate")
 def generate_users():
@@ -13,19 +13,11 @@ def generate_users():
     return {"data": generated_data}
 
 @router.get("/cluster")
-def cluster_users():
+def cluster_users(k: int = 3):
     global generated_data
     if not generated_data:
-        return {"error": "No data to cluster. Please generate users first."}
-    
-    import pandas as pd
-    df = pd.DataFrame(generated_data)  # ✅ Convert list of dicts to DataFrame
-    labels = cluster_logic(df)
+        raise HTTPException(status_code=400, detail="No data available to cluster.")
 
-    # Attach cluster labels to original user dicts
-    for user, label in zip(generated_data, labels):
-        user["cluster"] = int(label)  # ✅ ensure it's JSON-serializable
-
-    return {"clustered_data": generated_data}
-
-
+    df = pd.DataFrame(generated_data)
+    clustered_df = cluster_logic(df, k)
+    return {"clustered_data": clustered_df.to_dict(orient="records")}

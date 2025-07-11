@@ -1,6 +1,9 @@
 <script lang="ts">
+
+	import ClusterBarChart from '$lib/ClusterBarChart.svelte';
 	let users: any[] = [];
 	let selectedAction = 'generate';
+	let chosenK = 3;
 
 	async function handleAction() {
 		if (selectedAction === 'generate') {
@@ -12,7 +15,7 @@
 				alert("Please generate users first.");
 				return;
 			}
-			const res = await fetch('http://localhost:8000/cluster');
+			const res = await fetch(`http://localhost:8000/cluster?k=${chosenK}`);
 			const json = await res.json();
 			users = json.clustered_data;
 		}
@@ -22,8 +25,8 @@
 
 	$: if (users.length) {
 		clusterCounts = users.reduce((acc, u) => {
-			const c = u.cluster ?? "Unclustered";
-			acc[c] = (acc[c] || 0) + 1;
+			const desc = u.cluster_description ?? `Cluster ${u.cluster}`;
+			acc[desc] = (acc[desc] || 0) + 1;
 			return acc;
 		}, {});
 	}
@@ -41,6 +44,22 @@
 			<option value="generate">Generate Users</option>
 			<option value="cluster">Cluster Users</option>
 		</select>
+		
+		{#if selectedAction === 'cluster'}
+			<div class="flex items-center gap-2 mr-2">
+				<label for="cluster-k" class="text-sm text-gray-700 whitespace-nowrap">
+					Choose number of clusters (k):
+				</label>
+				<input
+					id="cluster-k"
+					type="number"
+					bind:value={chosenK}
+					min="1"
+					max="10"
+					class="bg-amber-500 text-white px-4 py-2 rounded-lg hover:bg-amber-600 shadow text-center"
+				/>
+			</div>
+		{/if}
 
 		<button
 			on:click={handleAction}
@@ -49,7 +68,7 @@
 		</button>
 	</div>
 
-		{#if Object.keys(clusterCounts).length}
+	{#if Object.keys(clusterCounts).length}
 	<div class="mt-8 w-full max-w-md bg-white bg-opacity-90 p-4 rounded shadow">
 		<h2 class="text-lg font-semibold mb-2">Cluster Summary</h2>
 		<ul class="list-disc list-inside text-left text-gray-800">
@@ -59,6 +78,17 @@
 		</ul>
 	</div>
 	{/if}
+
+	{#if Object.keys(clusterCounts).length}
+		<div class="mt-8 w-full max-w-md">
+			<ClusterBarChart data={clusterCounts} />
+		</div>
+	{/if}
+
+	{#if users.length === 0}
+		<p class="mt-6 text-gray-600">No users generated yet. Click "Generate Users" to start.</p>
+	{/if}
+
 
 	{#if users.length > 0}
 		<table class="mt-6 w-full border text-sm text-gray-800 bg-white bg-opacity-90">

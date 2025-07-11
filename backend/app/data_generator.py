@@ -10,9 +10,8 @@ def generate_user_data(num_users=100):
         users.append({
             "name": fake.first_name(),
             "age": int(np.random.randint(18, 70)),
-            "monthly_spend": float(round(np.random.normal(2000, 500), 2)),
+            "monthly_spend": max(0, float(round(np.random.normal(2000, 500), 2))),
             "num_txns": int(np.random.poisson(30)),
-            "savings": float(round(np.random.normal(15000, 5000), 2))
+            "savings": max(0, float(round(np.random.normal(15000, 5000), 2)))
         })
     return users
-
