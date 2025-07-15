@@ -17,19 +17,19 @@ def cluster_logic(df, k=3):
     cluster_descriptions = {}
     for idx, row in summary.iterrows():
         desc = []
-        if row["monthly_spend"] > 2000:
+        if row["monthly_spend"] > 1000:
             desc.append("high spender")
-        if row["savings"] > 30000:
+        if row["savings"] > 15000:
             desc.append("wealthy")
         if row["age"] < 30:
             desc.append("young")
-        if row["num_txns"] > 60:
+        if row["num_txns"] > 20:
             desc.append("frequent user")
 
-        label = ", ".join(desc) if desc else "unclassified"
+        label = f"Cluster {idx}: {', '.join(desc) if desc else 'unclassified'}"
         cluster_descriptions[idx] = label
 
     # Attach descriptions back to each row
     df["cluster_description"] = df["cluster"].map(cluster_descriptions)
 
-    return df  # now includes cluster + description
+    return df 
