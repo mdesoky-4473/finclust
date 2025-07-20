@@ -1,13 +1,49 @@
 <script lang="ts">
 
 	import ClusterBarChart from '$lib/ClusterBarChart.svelte';
+	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
+	import { isAuthenticated } from '$lib/stores/auth';
+	import { onDestroy } from 'svelte';
+	import { browser } from '$app/environment';
+
+	let unsubscribe: () => void = () => {};
+	let token: string | null = null;
 	let users: any[] = [];
 	let selectedAction = 'generate';
 	let chosenK = 3;
 
+	
+	onMount(() => {
+	if (browser) {
+		unsubscribe = isAuthenticated.subscribe((auth) => {
+			if (!auth) {
+				goto('/login');
+				return;
+			}
+			token = localStorage.getItem('token');
+		});
+		}
+	});
+
+	onDestroy(() => {
+		unsubscribe();
+	});
+
 	async function handleAction() {
+
+		if (!token) {
+			alert("You are not authorized.");
+			goto('/login');
+			return;
+		}
+
 		if (selectedAction === 'generate') {
-			const res = await fetch('http://localhost:8000/generate');
+			const res = await fetch('http://localhost:8000/generate', {
+				headers: {
+					Authorization: `Bearer ${token}`
+				}
+			});
 			const json = await res.json();
 			users = json.data;
 		} else if (selectedAction === 'cluster') {
@@ -15,7 +51,11 @@
 				alert("Please generate users first.");
 				return;
 			}
-			const res = await fetch(`http://localhost:8000/cluster?k=${chosenK}`);
+			const res = await fetch(`http://localhost:8000/cluster?k=${chosenK}`, {
+				headers: {
+					Authorization: `Bearer ${token}`
+				}
+			});
 			const json = await res.json();
 			users = json.clustered_data;
 		}
@@ -25,7 +65,7 @@
 
 	$: if (users.length) {
 		clusterCounts = users.reduce((acc, u) => {
-			const desc = u.cluster_description ?? `Cluster ${u.cluster}`;
+			const desc = u.cluster_description ?? `Clusters ${u.cluster}`;
 			acc[desc] = (acc[desc] || 0) + 1;
 			return acc;
 		}, {});
@@ -69,21 +109,24 @@
 	</div>
 
 	{#if Object.keys(clusterCounts).length}
-	<div class="mt-8 w-full max-w-md bg-white bg-opacity-90 p-4 rounded shadow">
-		<h2 class="text-lg font-semibold mb-2">Cluster Summary</h2>
-		<ul class="list-disc list-inside text-left text-gray-800">
-			{#each Object.entries(clusterCounts) as [cluster, count]}
-				<li>Cluster {cluster}: {count} users</li>
-			{/each}
-		</ul>
-	</div>
-	{/if}
+		<div class="mt-8 flex flex-col md:flex-row gap-6 justify-center items-start w-full max-w-6xl">
+			<!-- Summary -->
+			<div class="w-full max-w-md bg-white bg-opacity-90 p-4 rounded shadow">
+				<h2 class="text-lg font-semibold mb-2">Cluster Summary</h2>
+				<ul class="list-disc list-inside text-left text-gray-800">
+					{#each Object.entries(clusterCounts) as [cluster, count]}
+						<li>Cluster {cluster}: {count} users</li>
+					{/each}
+				</ul>
+			</div>
 
-	{#if Object.keys(clusterCounts).length}
-		<div class="mt-8 w-full max-w-md">
-			<ClusterBarChart data={clusterCounts} />
+			<!-- Chart -->
+			<div class="w-full max-w-md">
+				<ClusterBarChart data={clusterCounts} />
+			</div>
 		</div>
 	{/if}
+
 
 	{#if users.length === 0}
 		<p class="mt-6 text-gray-600">No users generated yet. Click "Generate Users" to start.</p>

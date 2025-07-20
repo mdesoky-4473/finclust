@@ -6,7 +6,7 @@ body {
   background: 
     linear-gradient(to bottom right, rgba(240, 244, 248, 0.7), rgba(226, 232, 240, 0.7)),
     url('https://images.squarespace-cdn.com/content/v1/6775a9410cb071258cbf5576/6c08fcfc-132a-47e9-9a38-e69aa4766bba/img-5.jpg?format=1000w');
-  background-attachment: fixed;         /* 🧠 Keeps it fixed */
+  background-attachment: fixed;         
   background-repeat: no-repeat;
   background-position: center center;
   background-size: cover;
