@@ -8,6 +8,7 @@
 	let message = '';
 	let loading = false;
 	let timer: NodeJS.Timeout | undefined;
+	const API_URL = import.meta.env.VITE_API_URL;
 
 	async function register() {
 		message = '';
@@ -18,7 +19,7 @@
 		loading = true;
 
 		try {
-			const res = await fetch('http://localhost:8000/auth/register', {
+			const res = await fetch(`${API_URL}/auth/register`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ email, password })

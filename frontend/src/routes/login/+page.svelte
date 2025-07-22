@@ -5,11 +5,12 @@
 	let email = '';
 	let password = '';
 	let error = '';
+    const API_URL = import.meta.env.VITE_API_URL;
 
 	async function handleLogin() {
 		error = '';
 		try {
-			const res = await fetch('http://localhost:8000/auth/jwt/login', {
+			const res = await fetch(`${API_URL}/auth/jwt/login`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/x-www-form-urlencoded'
