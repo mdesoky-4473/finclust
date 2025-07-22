@@ -12,6 +12,8 @@
 	let users: any[] = [];
 	let selectedAction = 'generate';
 	let chosenK = 3;
+	const API_URL = import.meta.env.VITE_API_URL;
+
 
 	
 	onMount(() => {
@@ -39,7 +41,7 @@
 		}
 
 		if (selectedAction === 'generate') {
-			const res = await fetch('http://localhost:8000/generate', {
+			const res = await fetch(`${API_URL}/generate`, {
 				headers: {
 					Authorization: `Bearer ${token}`
 				}
@@ -51,7 +53,7 @@
 				alert("Please generate users first.");
 				return;
 			}
-			const res = await fetch(`http://localhost:8000/cluster?k=${chosenK}`, {
+			const res = await fetch(`${API_URL}/cluster?k=${chosenK}`, {
 				headers: {
 					Authorization: `Bearer ${token}`
 				}
